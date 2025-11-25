@@ -1,6 +1,6 @@
 #include "texture.hpp"
 
-Texture::Texture(const char *image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
+Engine::Graphics::Texture::Texture(const char *image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
 {
    // Assigns the type of the texture ot the texture object
    type = texType;
@@ -42,7 +42,7 @@ Texture::Texture(const char *image, GLenum texType, GLenum slot, GLenum format, 
    glBindTexture(texType, 0);
 }
 
-void Texture::texUnit(Shader &shader, const char *uniform, GLuint unit)
+void Engine::Graphics::Texture::texUnit(Shader &shader, const char *uniform, GLuint unit)
 {
    // Gets the location of the uniform
    GLuint texUni = glGetUniformLocation(shader.ID, uniform);
@@ -52,17 +52,17 @@ void Texture::texUnit(Shader &shader, const char *uniform, GLuint unit)
    glUniform1i(texUni, unit);
 }
 
-void Texture::Bind()
+void Engine::Graphics::Texture::Bind()
 {
    glBindTexture(type, ID);
 }
 
-void Texture::Unbind()
+void Engine::Graphics::Texture::Unbind()
 {
    glBindTexture(type, 0);
 }
 
-void Texture::Delete()
+void Engine::Graphics::Texture::Delete()
 {
    glDeleteTextures(1, &ID);
 }

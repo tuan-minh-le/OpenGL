@@ -2,23 +2,24 @@
 #define SHADER_HPP
 
 #include <GL/glew.h>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <glm/glm.hpp>
+
 #include <string>
+
+namespace Engine{
+namespace Graphics{
 
 class Shader
 {
 public:
     unsigned int ID;
-    
+
     // Constructor
     Shader(const char* vertexPath, const char* fragmentPath);
-    
+
     // Activate the shader
     void use() const;
-    
+
     // Utility uniform functions
     void setBool(const std::string &name, bool value) const;
     void setInt(const std::string &name, int value) const;
@@ -42,5 +43,6 @@ private:
     // Utility function for checking shader compilation/linking errors
     void checkCompileErrors(GLuint shader, std::string type);
 };
+}}
 
 #endif

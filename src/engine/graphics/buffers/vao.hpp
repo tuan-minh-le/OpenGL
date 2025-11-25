@@ -4,6 +4,10 @@
 #include "vbo.hpp"
 #include <GL/glew.h>
 
+namespace Engine{
+namespace Graphics{
+namespace Buffers{
+
 class VAO
 {
 public:
@@ -21,5 +25,6 @@ public:
    // Deletes the VAO
    void Delete();
 };
+}}}
 
 #endif

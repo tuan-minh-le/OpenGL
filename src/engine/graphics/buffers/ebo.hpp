@@ -3,6 +3,10 @@
 
 #include <GL/glew.h>
 
+namespace Engine{
+namespace Graphics{
+namespace Buffers{
+
 class EBO
 {
 public:
@@ -18,5 +22,6 @@ public:
 	// Deletes the EBO
 	void Delete();
 };
+}}}
 
 #endif

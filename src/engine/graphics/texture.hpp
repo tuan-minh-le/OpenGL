@@ -6,6 +6,9 @@
 
 #include "shader.hpp"
 
+namespace Engine{
+namespace Graphics{
+
 class Texture
 {
 public:
@@ -22,4 +25,5 @@ public:
    // Deletes a texture
    void Delete();
 };
+}}
 #endif

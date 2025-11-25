@@ -3,6 +3,10 @@
 
 #include <GL/glew.h>
 
+namespace Engine{
+namespace Graphics{
+namespace Buffers{
+
 class VBO
 {
 public:
@@ -18,5 +22,6 @@ public:
    // Deletes the VBO
    void Delete();
 };
+}}}
 
 #endif

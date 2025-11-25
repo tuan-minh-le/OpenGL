@@ -1,9 +1,12 @@
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef ENGINE_GRAPHICS_CAMERA_HPP
+#define ENGINE_GRAPHICS_CAMERA_HPP
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+namespace Engine{
+namespace Graphics{
 
 // Defines several possible options for camera movement
 enum Camera_Movement {
@@ -14,11 +17,7 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const float YAW         = -90.0f;
-const float PITCH       =  0.0f;
-const float SPEED       =  2.5f;
-const float SENSITIVITY =  0.1f;
-const float ZOOM        =  45.0f;
+
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
@@ -31,20 +30,10 @@ public:
     glm::vec3 Right;
     glm::vec3 WorldUp;
     
-    // Euler Angles
-    float Yaw;
-    float Pitch;
-    
-    // Camera options
-    float MovementSpeed;
-    float MouseSensitivity;
-    float Zoom;
-
     // Constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
-           glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), 
-           float yaw = YAW, 
-           float pitch = PITCH);
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+           glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+           float yaw = -90.0f, float pitch = 0.0f);
     
     // Constructor with scalar values
     Camera(float posX, float posY, float posZ, 
@@ -62,10 +51,18 @@ public:
 
     // Processes input received from a mouse scroll-wheel event
     void ProcessMouseScroll(float yoffset);
+    
+    float GetZoom() const;
 
 private:
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors();
+    
+    float yaw;
+    float pitch;
+    float speed;
+    float sensitivity;
+    float zoom;
 };
-
+}}
 #endif
