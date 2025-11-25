@@ -7,6 +7,7 @@
 #include "engine/graphics/shader.hpp"
 #include "engine/graphics/texture.hpp"
 #include "engine/graphics/camera.hpp"
+#include "glm/fwd.hpp"
 
 const int WIDTH = 800;
 const int HEIGHT = 800;
@@ -107,6 +108,7 @@ int main()
 
     // Generates Shader object using shaders defualt.vert and default.frag
     Engine::Graphics::Shader shaderProgram("../shaders/default.vert", "../shaders/default.frag");
+    Engine::Graphics::Shader lightProgram("../shaders/light.vert", "../shaders/light.frag");
 
     // Textures
     Engine::Graphics::Texture Cat("../textures/cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
@@ -117,7 +119,8 @@ int main()
 
 
     Engine::Graphics::Mesh cubeMesh = Engine::Graphics::Mesh::CreateCube(1.0f, &Dirt);
-
+    Engine::Graphics::Mesh lightCube = Engine::Graphics::Mesh::CreateCube(1.0f);
+    
     // Check for OpenGL errors
     GLenum err;
     while((err = glGetError()) != GL_NO_ERROR) {
@@ -139,12 +142,18 @@ int main()
 
         processInput(window);
         // Specify the color of the background
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         // Clean the back buffer and assign the new color to it
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // Tell OpenGL which Shader Program we want to use
-
+            
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+        
         shaderProgram.Activate();
+        shaderProgram.setVec3("lightColor", lightColor);
+        shaderProgram.setVec3("lightPos", lightPos);
+        shaderProgram.setVec3("viewPos", camera.Position);
 
         glm::mat4 proj = glm::mat4(1.0f);
 
@@ -160,6 +169,20 @@ int main()
 
         // Mesh now handles texture binding automatically
         cubeMesh.Draw(shaderProgram);
+        
+
+        lightProgram.Activate();
+        lightProgram.setVec3("lightColor", lightColor);
+        lightProgram.setMat4("view", view);
+        lightProgram.setMat4("proj", proj);
+        
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); 
+        
+        lightProgram.setMat4("model", model);
+        
+        lightCube.Draw(lightProgram);
 
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);

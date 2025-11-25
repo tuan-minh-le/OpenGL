@@ -6,6 +6,8 @@ layout(location = 2) in vec3 aNor;
 // out vec3 color;
 
 out vec2 texCoord;
+out vec3 Normal;
+out vec3 FragPos; 
 
 uniform mat4 model;
 uniform mat4 view;
@@ -14,6 +16,7 @@ uniform mat4 proj;
 void main()
 {
    gl_Position = proj * view * model * vec4(aPos, 1.0f); 
-   // color = aColor;
    texCoord = aTex;
+   FragPos = vec3(model * vec4(aPos, 1.0));
+   Normal = aNor;
 }
