@@ -107,17 +107,17 @@ int main()
 
     // Generates Shader object using shaders defualt.vert and default.frag
     Engine::Graphics::Shader shaderProgram("../shaders/default.vert", "../shaders/default.frag");
-    
+
     // Textures
     Engine::Graphics::Texture Cat("../textures/cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     Cat.texUnit(shaderProgram, "tex0", 0);
-    
+
     Engine::Graphics::Texture Dirt("../textures/dirt.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     Dirt.texUnit(shaderProgram, "tex0", 0);
-    
-    
+
+
     Engine::Graphics::Mesh cubeMesh = Engine::Graphics::Mesh::CreateCube(1.0f, &Dirt);
-    
+
     // Check for OpenGL errors
     GLenum err;
     while((err = glGetError()) != GL_NO_ERROR) {
@@ -125,10 +125,10 @@ int main()
     }
 
     glEnable(GL_DEPTH_TEST);
-    
+
     std::cout << "Starting render loop..." << std::endl;
     std::cout << "Camera position: " << camera.Position.x << ", " << camera.Position.y << ", " << camera.Position.z << std::endl;
-    
+
     // Main while loop
     while (!glfwWindowShouldClose(window))
     {

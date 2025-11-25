@@ -29,15 +29,15 @@ public:
     glm::vec3 Up;
     glm::vec3 Right;
     glm::vec3 WorldUp;
-    
+
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
            float yaw = -90.0f, float pitch = 0.0f);
-    
+
     // Constructor with scalar values
-    Camera(float posX, float posY, float posZ, 
-           float upX, float upY, float upZ, 
+    Camera(float posX, float posY, float posZ,
+           float upX, float upY, float upZ,
            float yaw, float pitch);
 
     // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
@@ -51,13 +51,13 @@ public:
 
     // Processes input received from a mouse scroll-wheel event
     void ProcessMouseScroll(float yoffset);
-    
+
     float GetZoom() const;
 
 private:
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors();
-    
+
     float yaw;
     float pitch;
     float speed;

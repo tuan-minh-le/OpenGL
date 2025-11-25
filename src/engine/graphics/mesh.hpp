@@ -14,17 +14,17 @@ using namespace Engine::Graphics::Buffers;
 
 namespace Engine{
 namespace Graphics{
-    
+
 // Struct for vertex data containing {position [x, y, z], texture mapping [0, 1], normal vector for lighting) [x, y, z]}
 struct Vertex {
     glm::vec3 position;
     glm::vec2 texCoords;
     glm::vec3 normal;
-    
+
     Vertex(glm::vec3 pos, glm::vec2 tex, glm::vec3 norm)
         : position(pos), texCoords(tex), normal(norm) {}
-    
-    Vertex() 
+
+    Vertex()
         : position(0.0f), texCoords(0.0f), normal(0.0f, 0.0f, 1.0f) {}
 };
 
@@ -33,14 +33,14 @@ class Mesh{
         VAO vao;
         VBO vbo;
         EBO ebo;
-        
-        std::vector<Vertex> vertices; 
+
+        std::vector<Vertex> vertices;
         std::vector<GLuint> indices;
         bool hasIndices;
         Texture* texture;
-        
+
         void setupMesh(); // Handles buffer binding (VAO, VBO, EBO (if applicable))
-    
+
     public:
         Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint> indices = {}, Texture* tex = nullptr);
         void Draw(Shader& shader);

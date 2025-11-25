@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-Engine::Graphics::Mesh::Mesh(const std::vector<Vertex>& vertices, 
+Engine::Graphics::Mesh::Mesh(const std::vector<Vertex>& vertices,
     const std::vector<GLuint> indices, Texture* tex)
     : vertices(vertices), indices(indices), texture(tex){
         hasIndices = !indices.empty();
@@ -15,7 +15,7 @@ Engine::Graphics::Mesh::~Mesh(){
     ebo.Delete();
     vao.Delete();
 }
-    
+
 
 void Engine::Graphics::Mesh::setupMesh(){
     vao.Bind();
@@ -29,26 +29,26 @@ void Engine::Graphics::Mesh::setupMesh(){
     vao.LinkAttrib(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
     // Normal
     vao.LinkAttrib(vbo, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    
+
     vao.Unbind();
 }
 
 void Engine::Graphics::Mesh::Draw(Shader& shader){
     shader.Activate();
-    
+
     if(texture != nullptr){
         texture->Bind();
     }
-    
+
     vao.Bind();
-    
+
     if(hasIndices){
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     }
     else{
         glDrawArrays(GL_TRIANGLES, 0, vertices.size());
     }
-    
+
     vao.Unbind();
 }
 
@@ -58,9 +58,9 @@ void Engine::Graphics::Mesh::SetTexture(Texture* tex){
 
 Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* tex) {
     float halfSize = size / 2.0f;
-    
+
     std::vector<Vertex> vertices;
-    
+
     // Front face
     vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}});
     vertices.push_back({{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}});
@@ -68,7 +68,7 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* t
     vertices.push_back({{ halfSize,  halfSize,  halfSize}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}});
     vertices.push_back({{-halfSize,  halfSize,  halfSize}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}});
     vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}});
-    
+
     // Back face
     vertices.push_back({{-halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
     vertices.push_back({{-halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
@@ -76,7 +76,7 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* t
     vertices.push_back({{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
     vertices.push_back({{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
     vertices.push_back({{-halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
-    
+
     // Left face
     vertices.push_back({{-halfSize,  halfSize,  halfSize}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
     vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
@@ -84,7 +84,7 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* t
     vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
     vertices.push_back({{-halfSize, -halfSize,  halfSize}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
     vertices.push_back({{-halfSize,  halfSize,  halfSize}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
-    
+
     // Right face
     vertices.push_back({{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
     vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
@@ -92,7 +92,7 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* t
     vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
     vertices.push_back({{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
     vertices.push_back({{ halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
-    
+
     // Bottom face
     vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
     vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
@@ -100,7 +100,7 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* t
     vertices.push_back({{ halfSize, -halfSize,  halfSize}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
     vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
     vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
-    
+
     // Top face
     vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}});
     vertices.push_back({{-halfSize,  halfSize,  halfSize}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}});
@@ -108,6 +108,6 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* t
     vertices.push_back({{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}});
     vertices.push_back({{ halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}});
     vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}});
-    
+
     return Mesh(vertices, {}, tex);  // No indices needed - using triangles directly
 }
