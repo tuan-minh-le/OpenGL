@@ -5,6 +5,7 @@
 #include "buffers/vbo.hpp"
 #include "buffers/vao.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <vector>
@@ -36,13 +37,15 @@ class Mesh{
         std::vector<Vertex> vertices; 
         std::vector<GLuint> indices;
         bool hasIndices;
+        Texture* texture;
         
         void setupMesh(); // Handles buffer binding (VAO, VBO, EBO (if applicable))
     
     public:
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint> indices = {});
+        Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint> indices = {}, Texture* tex = nullptr);
         void Draw(Shader& shader);
-        static Mesh CreateCube(float size = 1.0f);
+        void SetTexture(Texture* tex);
+        static Mesh CreateCube(float size = 1.0f, Texture* tex = nullptr);
         ~Mesh();
 };
 }}

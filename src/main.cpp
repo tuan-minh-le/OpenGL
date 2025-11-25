@@ -108,11 +108,15 @@ int main()
     // Generates Shader object using shaders defualt.vert and default.frag
     Engine::Graphics::Shader shaderProgram("../shaders/default.vert", "../shaders/default.frag");
     
-    Engine::Graphics::Mesh cubeMesh = Engine::Graphics::Mesh::CreateCube();
-    
     // Textures
     Engine::Graphics::Texture Cat("../textures/cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     Cat.texUnit(shaderProgram, "tex0", 0);
+    
+    Engine::Graphics::Texture Dirt("../textures/dirt.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    Dirt.texUnit(shaderProgram, "tex0", 0);
+    
+    
+    Engine::Graphics::Mesh cubeMesh = Engine::Graphics::Mesh::CreateCube(1.0f, &Dirt);
     
     // Check for OpenGL errors
     GLenum err;
@@ -148,18 +152,14 @@ int main()
 
         glm::mat4 view = camera.GetViewMatrix();
 
-
         shaderProgram.setMat4("view", view);
         shaderProgram.setMat4("proj", proj);
 
         glm::mat4 model = glm::mat4(1.0f);
         shaderProgram.setMat4("model", model);
 
-        Cat.Bind();
-        // Bind the VAO so OpenGL knows to use it
+        // Mesh now handles texture binding automatically
         cubeMesh.Draw(shaderProgram);
-        // Draw primitives, number of indices, datatype of indices, index of indices
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Swap the back buffer with the front buffer
         glfwSwapBuffers(window);

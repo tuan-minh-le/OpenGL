@@ -4,8 +4,8 @@
 #include <vector>
 
 Engine::Graphics::Mesh::Mesh(const std::vector<Vertex>& vertices, 
-    const std::vector<GLuint> indices)
-    : vertices(vertices), indices(indices){
+    const std::vector<GLuint> indices, Texture* tex)
+    : vertices(vertices), indices(indices), texture(tex){
         hasIndices = !indices.empty();
         setupMesh();
 }
@@ -35,6 +35,11 @@ void Engine::Graphics::Mesh::setupMesh(){
 
 void Engine::Graphics::Mesh::Draw(Shader& shader){
     shader.Activate();
+    
+    if(texture != nullptr){
+        texture->Bind();
+    }
+    
     vao.Bind();
     
     if(hasIndices){
@@ -47,7 +52,11 @@ void Engine::Graphics::Mesh::Draw(Shader& shader){
     vao.Unbind();
 }
 
-Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size) {
+void Engine::Graphics::Mesh::SetTexture(Texture* tex){
+    texture = tex;
+}
+
+Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size, Texture* tex) {
     float halfSize = size / 2.0f;
     
     std::vector<Vertex> vertices;
@@ -61,36 +70,36 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size) {
     vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}});
     
     // Back face
-    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
-    vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
-    vertices.push_back({{ halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
-    vertices.push_back({{ halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
-    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
-    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
+    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
+    vertices.push_back({{-halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
+    vertices.push_back({{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
+    vertices.push_back({{ halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}});
+    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
+    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}});
     
     // Left face
-    vertices.push_back({{-halfSize,  halfSize,  halfSize}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{-halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{-halfSize,  halfSize,  halfSize}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{-halfSize,  halfSize,  halfSize}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{-halfSize, -halfSize,  halfSize}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{-halfSize,  halfSize,  halfSize}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}});
     
     // Right face
-    vertices.push_back({{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
     vertices.push_back({{ halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
-    vertices.push_back({{ halfSize,  halfSize,  halfSize}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{ halfSize,  halfSize,  halfSize}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}});
     vertices.push_back({{ halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}});
     
     // Bottom face
-    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
-    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
-    vertices.push_back({{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
-    vertices.push_back({{ halfSize, -halfSize,  halfSize}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
-    vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
-    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
+    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
+    vertices.push_back({{ halfSize, -halfSize, -halfSize}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
+    vertices.push_back({{ halfSize, -halfSize,  halfSize}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
+    vertices.push_back({{ halfSize, -halfSize,  halfSize}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
+    vertices.push_back({{-halfSize, -halfSize,  halfSize}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}});
+    vertices.push_back({{-halfSize, -halfSize, -halfSize}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}});
     
     // Top face
     vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}});
@@ -100,5 +109,5 @@ Engine::Graphics::Mesh Engine::Graphics::Mesh::CreateCube(float size) {
     vertices.push_back({{ halfSize,  halfSize, -halfSize}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}});
     vertices.push_back({{-halfSize,  halfSize, -halfSize}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}});
     
-    return Mesh(vertices);  // No indices needed - using triangles directly
+    return Mesh(vertices, {}, tex);  // No indices needed - using triangles directly
 }
