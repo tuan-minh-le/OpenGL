@@ -2,8 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "engine/graphics/buffers/vao.hpp"
-#include "engine/graphics/buffers/ebo.hpp"
+#include "engine/graphics/mesh.hpp"
 #include <stb_image/stb_image.h>
 #include "engine/graphics/shader.hpp"
 #include "engine/graphics/texture.hpp"
@@ -20,68 +19,6 @@ bool firstMouse = true;
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
-// Vertices coordinates
-GLfloat vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
-
-glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(2.0f, 5.0f, -15.0f),
-    glm::vec3(-1.5f, -2.2f, -2.5f),
-    glm::vec3(-3.8f, -2.0f, -12.3f),
-    glm::vec3(2.4f, -0.4f, -3.5f),
-    glm::vec3(-1.7f, 3.0f, -7.5f),
-    glm::vec3(1.3f, -2.0f, -2.5f),
-    glm::vec3(1.5f, 2.0f, -2.5f),
-    glm::vec3(1.5f, 0.2f, -1.5f),
-    glm::vec3(-1.3f, 1.0f, -1.5f)};
-
-// Indices for vertices order
-GLuint indices[] =
-    {
-        0, 2, 1, // Upper triangle
-        0, 3, 2  // Lower triangle
-};
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -170,26 +107,9 @@ int main()
 
     // Generates Shader object using shaders defualt.vert and default.frag
     Engine::Graphics::Shader shaderProgram("../shaders/default.vert", "../shaders/default.frag");
-
-    // Generates Vertex Array Object and binds it
-    Engine::Graphics::Buffers::VAO VAO1;
-    VAO1.Bind();
-
-    // Generates Vertex Buffer Object and links it to vertices
-    Engine::Graphics::Buffers::VBO VBO1(vertices, sizeof(vertices));
-    // Generates Element Buffer Object and links it to indices
-    Engine::Graphics::Buffers::EBO EBO1(indices, sizeof(indices));
-
-    // Links VBO to VAO
-    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 5 * sizeof(float), (void *)0);
-    // VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float))); // 3 * number of coord to calculate offset to color attrib
-    VAO1.LinkAttrib(VBO1, 1, 2, GL_FLOAT, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-
-    // Unbind all to prevent accidentally modifying them
-    VAO1.Unbind();
-    VBO1.Unbind();
-    EBO1.Unbind();
-
+    
+    Engine::Graphics::Mesh cubeMesh = Engine::Graphics::Mesh::CreateCube();
+    
     // Textures
     Engine::Graphics::Texture Cat("../textures/cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     Cat.texUnit(shaderProgram, "tex0", 0);
@@ -232,20 +152,12 @@ int main()
         shaderProgram.setMat4("view", view);
         shaderProgram.setMat4("proj", proj);
 
+        glm::mat4 model = glm::mat4(1.0f);
+        shaderProgram.setMat4("model", model);
+
         Cat.Bind();
         // Bind the VAO so OpenGL knows to use it
-        VAO1.Bind();
-
-        for (int i = 1; i < 11; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-            model = glm::translate(model, cubePositions[i - 1]);
-            float angle = 20.f * i;
-            model = glm::rotate(model, glm::radians(angle) * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-            shaderProgram.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        cubeMesh.Draw(shaderProgram);
         // Draw primitives, number of indices, datatype of indices, index of indices
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -256,9 +168,7 @@ int main()
     }
 
     // Delete all the objects we've created
-    VAO1.Delete();
-    VBO1.Delete();
-    EBO1.Delete();
+
     Cat.Delete();
     shaderProgram.Delete();
     // Delete window before ending the program

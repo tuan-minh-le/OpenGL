@@ -1,5 +1,5 @@
-#ifndef VAO_HPP
-#define VAO_HPP
+#ifndef ENGINE_GRAPHICS__BUFFERS_VAO_HPP
+#define ENGINE_GRAPHICS__BUFFERS_VAO_HPP
 
 #include "vbo.hpp"
 #include <GL/glew.h>

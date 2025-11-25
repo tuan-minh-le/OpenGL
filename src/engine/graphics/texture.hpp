@@ -1,5 +1,5 @@
-#ifndef TEXTURE_HPP
-#define TEXTURE_HPP
+#ifndef ENGINE_GRAPHICS_TEXTURE_HPP
+#define ENGINE_GRAPHICS_TEXTURE_HPP
 
 #include <GL/glew.h>
 #include <stb_image/stb_image.h>
