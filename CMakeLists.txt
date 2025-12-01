@@ -9,7 +9,7 @@ find_package(glfw3 3.3 REQUIRED)
 find_package(GLEW REQUIRED)
 
 # Source files
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "include/imgui/*.cpp")
 
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
