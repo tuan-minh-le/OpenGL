@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -5,6 +6,8 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
+#include "engine/graphics/light.hpp"
+#include "engine/graphics/lightmanager.hpp"
 #include "engine/graphics/mesh.hpp"
 #include <stb_image/stb_image.h>
 #include <vector>
@@ -13,10 +16,11 @@
 #include "engine/graphics/camera.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
-const int WIDTH = 800;
-const int HEIGHT = 800;
+const int WIDTH = 1500;
+const int HEIGHT = 700;
 
 Engine::Graphics::Camera camera(glm::vec3(-2.0f, 2.0f, 5.0f));
+Engine::Graphics::LightManager lightManager;
 float lastX = WIDTH / 2.0f;
 float lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -27,7 +31,7 @@ float lastFrame = 0.0f; // Time of last frame
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, width - 600, height);
 }
 
 void processInput(GLFWwindow *window)
@@ -108,7 +112,7 @@ int main()
     // Get actual framebuffer size (handles Retina displays)
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, width - 600, height);
     
     //ImGUI setup
     IMGUI_CHECKVERSION();
@@ -147,6 +151,33 @@ int main()
 
     std::cout << "Starting render loop..." << std::endl;
     std::cout << "Camera position: " << camera.Position.x << ", " << camera.Position.y << ", " << camera.Position.z << std::endl;
+    
+    const int activePointLight = 4;
+    std::vector<glm::vec3> pointLightPositions(activePointLight);
+    
+    // Directional light properties
+    Engine::Graphics::DirectionalLight dirLight(
+        glm::vec3(-0.2f, -1.0f, -0.3f),
+        glm::vec3(0.05f, 0.05f, 0.05f),
+        glm::vec3(0.4f, 0.4f, 0.4f),
+        glm::vec3(0.5f, 0.5f, 0.5f)
+    );
+    lightManager.setDirectionalLight(dirLight);
+    
+    // Point light properties
+    
+    for(size_t i = 0; i < 4; i++){
+        Engine::Graphics::PointLight light(
+            pointLightPositions[i],
+            1.0f,
+            0.09f,
+            0.032f,
+            glm::vec3(0.05f, 0.05f, 0.05f),
+            glm::vec3(0.8f, 0.8f, 0.8f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
+        );
+        lightManager.addPointLight(light);
+    }
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -166,17 +197,26 @@ int main()
         {
             static float f = 0.0f;
             static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        
+            // Set up the ImGui window to be a fixed panel on the right
+            ImGui::SetNextWindowPos(ImVec2(WIDTH - 300, 0));  // Position at right edge
+            ImGui::SetNextWindowSize(ImVec2(300, HEIGHT));     // 300px wide, full height
+            
+            ImGuiWindowFlags window_flags = 0;
+            window_flags |= ImGuiWindowFlags_NoResize;
+            window_flags |= ImGuiWindowFlags_NoMove;
+            window_flags |= ImGuiWindowFlags_NoCollapse;
+            
+            ImGui::Begin("Control Panel", nullptr, window_flags);
+        
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color);
+        
+            if (ImGui::Button("Button"))
                 counter++;
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
-
+        
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }
@@ -192,10 +232,7 @@ int main()
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
         
         // Point light positions
-        const int activePointLight = 4;
-        std::vector<glm::vec3> pointLightPositions(activePointLight);
-        
-        for(int i = 0; i < pointLightPositions.size(); i++){
+        for(size_t i = 0; i < pointLightPositions.size(); i++){
             if(i % 2 == 0){
             float x = 4 * glm::sin(currentFrame +  i * 3.14 / 2);
             pointLightPositions[i] = glm::vec3(x, 0.0, 0.0);
@@ -205,6 +242,12 @@ int main()
             pointLightPositions[i] = glm::vec3(0.0, y, 0.0);
             }
         }
+        
+        for(size_t i = 0; i < pointLightPositions.size(); i++){
+            Engine::Graphics::PointLight& pLight = lightManager.setPointLight(i);
+            pLight.setPosition(pointLightPositions[i]);
+        }
+        
         
         // Multiple cube positions;
         std::vector<glm::vec3> cubePositions = {
@@ -229,47 +272,8 @@ int main()
         // 
         shaderProgram.setFloat("material.shininess", 16.0f);
         
-        // Directional light properties
-        shaderProgram.setVec3("dirlight.direction", -0.2f, -1.0f, -0.3f);
-        shaderProgram.setVec3("dirlight.ambient", 0.05f, 0.05f, 0.05f);
-        shaderProgram.setVec3("dirlight.diffuse", 0.4f, 0.4f, 0.4f);
-        shaderProgram.setVec3("dirlight.specular", 0.5f, 0.5f, 0.5f);
-        
-        // Point light properties
-       
-        // point light 1
-        shaderProgram.setVec3("pointLights[0].position", pointLightPositions[0]);
-        shaderProgram.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        shaderProgram.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        shaderProgram.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        shaderProgram.setFloat("pointLights[0].constant", 1.0f);
-        shaderProgram.setFloat("pointLights[0].linear", 0.09f);
-        shaderProgram.setFloat("pointLights[0].quadratic", 0.032f);
-        // point light 2
-        shaderProgram.setVec3("pointLights[1].position", pointLightPositions[1]);
-        shaderProgram.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        shaderProgram.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        shaderProgram.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        shaderProgram.setFloat("pointLights[1].constant", 1.0f);
-        shaderProgram.setFloat("pointLights[1].linear", 0.09f);
-        shaderProgram.setFloat("pointLights[1].quadratic", 0.032f);
-        // point light 3
-        shaderProgram.setVec3("pointLights[2].position", pointLightPositions[2]);
-        shaderProgram.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        shaderProgram.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        shaderProgram.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        shaderProgram.setFloat("pointLights[2].constant", 1.0f);
-        shaderProgram.setFloat("pointLights[2].linear", 0.09f);
-        shaderProgram.setFloat("pointLights[2].quadratic", 0.032f);
-        // point light 4
-        shaderProgram.setVec3("pointLights[3].position", pointLightPositions[3]);
-        shaderProgram.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        shaderProgram.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        shaderProgram.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        shaderProgram.setFloat("pointLights[3].constant", 1.0f);
-        shaderProgram.setFloat("pointLights[3].linear", 0.09f);
-        shaderProgram.setFloat("pointLights[3].quadratic", 0.032f);	
-        
+
+        lightManager.applyAll(shaderProgram);
 
         glm::mat4 proj = glm::mat4(1.0f);
 
@@ -287,6 +291,7 @@ int main()
             shaderProgram.setMat4("model", model);
             cubeMesh.Draw(shaderProgram);
         }
+        
 
         lightProgram.Activate();
         lightProgram.setVec3("lightColor", lightColor);
