@@ -10,6 +10,7 @@
 #include "engine/graphics/lightmanager.hpp"
 #include "engine/graphics/mesh.hpp"
 #include <stb_image/stb_image.h>
+#include <string>
 #include <vector>
 #include "engine/graphics/shader.hpp"
 #include "engine/graphics/texture.hpp"
@@ -24,6 +25,8 @@ Engine::Graphics::LightManager lightManager;
 float lastX = WIDTH / 2.0f;
 float lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
+bool cursorMode = false;
+
 
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -49,6 +52,18 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(Engine::Graphics::RIGHT, deltaTime);
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS){
+        cursorMode = !cursorMode;
+        std::cout << cursorMode << std::endl;
+    }
+    if(key == GLFW_KEY_F && action == GLFW_PRESS){
+        lightManager.setUseFlashLight(!lightManager.getUseFlashLight());
+        std::cout << lightManager.getUseFlashLight() << std::endl;
+    }
+}
+
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn)
 {
     float xpos = static_cast<float>(xposIn);
@@ -67,7 +82,7 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    if(!cursorMode) camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
@@ -102,6 +117,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, key_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Load GLEW so it configures OpenGL
@@ -165,7 +181,6 @@ int main()
     lightManager.setDirectionalLight(dirLight);
     
     // Point light properties
-    
     for(size_t i = 0; i < 4; i++){
         Engine::Graphics::PointLight light(
             pointLightPositions[i],
@@ -178,6 +193,10 @@ int main()
         );
         lightManager.addPointLight(light);
     }
+    
+    // FlashLight properties
+    Engine::Graphics::FlashLight flashLight(camera.Position, camera.Front);
+    lightManager.setFlashLight(flashLight);
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -192,10 +211,12 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-
+        static float cutOff = 0.0f;
+        static float outerCutOff = 0.0f;
+        
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            static float f = 0.0f;
+
             static int counter = 0;
         
             // Set up the ImGui window to be a fixed panel on the right
@@ -207,9 +228,21 @@ int main()
             window_flags |= ImGuiWindowFlags_NoMove;
             window_flags |= ImGuiWindowFlags_NoCollapse;
             
-            ImGui::Begin("Control Panel", nullptr, window_flags);
-        
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+            ImGui::Begin("Light Settings", nullptr, window_flags);
+            ImGui::Checkbox("Use Directional Light", lightManager.setUseDirLight());
+            
+            for(size_t i = 0; i < lightManager.getPointLightCount(); i++){
+                std::string label = "Use Point Light " + std::to_string(i);
+                bool tempBool = lightManager.getUsePointLight(i);
+                if(ImGui::Checkbox(label.c_str(), &tempBool)){
+                    lightManager.setUsePointLight(i, tempBool);
+                }
+                
+            }
+            
+            
+            ImGui::SliderFloat("Flash Light Cut Off", &cutOff, 0, 45);
+            ImGui::SliderFloat("Flash Light Outer Cut Off", &outerCutOff, 0, 45);
             ImGui::ColorEdit3("clear color", (float*)&clear_color);
         
             if (ImGui::Button("Button"))
@@ -227,28 +260,15 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         // Clean the back buffer and assign the new color to it
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // Tell OpenGL which Shader Program we want to use
+        
+        if(cursorMode){
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        } else{
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
 
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        
-        // Point light positions
-        for(size_t i = 0; i < pointLightPositions.size(); i++){
-            if(i % 2 == 0){
-            float x = 4 * glm::sin(currentFrame +  i * 3.14 / 2);
-            pointLightPositions[i] = glm::vec3(x, 0.0, 0.0);
-            }
-            else{
-            float y = 4 * glm::sin(currentFrame +  i * 3.14 / 2);
-            pointLightPositions[i] = glm::vec3(0.0, y, 0.0);
-            }
-        }
-        
-        for(size_t i = 0; i < pointLightPositions.size(); i++){
-            Engine::Graphics::PointLight& pLight = lightManager.setPointLight(i);
-            pLight.setPosition(pointLightPositions[i]);
-        }
-        
-        
+
         // Multiple cube positions;
         std::vector<glm::vec3> cubePositions = {
             glm::vec3(1.2f, 2.8f, -1.5f),
@@ -271,6 +291,33 @@ int main()
         // Material properties
         // 
         shaderProgram.setFloat("material.shininess", 16.0f);
+        
+        
+        // Point light positions
+        for(size_t i = 0; i < pointLightPositions.size(); i++){
+            if(i % 2 == 0){
+            float x = 4 * glm::sin(currentFrame +  i * 3.14 / 2);
+            pointLightPositions[i] = glm::vec3(x, 0.0, 0.0);
+            }
+            else{
+            float y = 4 * glm::sin(currentFrame +  i * 3.14 / 2);
+            pointLightPositions[i] = glm::vec3(0.0, y, 0.0);
+            }
+        }
+        
+        for(size_t i = 0; i < pointLightPositions.size(); i++){
+            Engine::Graphics::PointLight& pLight = lightManager.setPointLight(i);
+            pLight.setPosition(pointLightPositions[i]);
+        }
+        
+        // Update Flashlight
+        if(lightManager.getUseFlashLight()){
+            Engine::Graphics::FlashLight& fLight = lightManager.setFlashLight();
+            fLight.setPosition(camera.Position);
+            fLight.setDirection(camera.Front);
+            fLight.setCutOff(glm::cos(glm::radians(cutOff)), glm::cos(glm::radians(outerCutOff)));
+        }
+        
         
 
         lightManager.applyAll(shaderProgram);
@@ -299,11 +346,13 @@ int main()
         lightProgram.setMat4("proj", proj);
         
         for(int i = 0; i < pointLightPositions.size(); i++){
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLightPositions[i]);
-            model = glm::scale(model, glm::vec3(0.2f)); 
-            lightProgram.setMat4("model", model);
-            lightCube.Draw(lightProgram);
+            if(lightManager.getUsePointLight(i)){
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, pointLightPositions[i]);
+                model = glm::scale(model, glm::vec3(0.2f)); 
+                lightProgram.setMat4("model", model);
+                lightCube.Draw(lightProgram);
+            }
         }
 
         

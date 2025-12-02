@@ -105,3 +105,57 @@ void Engine::Graphics::PointLight::setAttenuation(float c, float l, float q){
 glm::vec3 Engine::Graphics::PointLight::GetPosition() const{
     return position;
 }
+
+/*
+ * FlashLight class implementation
+ */
+ 
+ Engine::Graphics::FlashLight::FlashLight(
+        glm::vec3 direction,
+        float cutOff,
+        float outerCutOff,
+        glm::vec3 pos,
+        float constant,
+        float linear,
+        float quadratic,
+        glm::vec3 ambient,
+        glm::vec3 diffuse,
+        glm::vec3 specular)
+: direction(direction), cutOff(cutOff), outerCutOff(outerCutOff), 
+PointLight(pos, constant, linear, quadratic, ambient, diffuse, specular){}
+
+Engine::Graphics::FlashLight::FlashLight(glm::vec3 pos, glm::vec3 dir){
+    position = pos;
+    direction = dir;
+    cutOff = glm::cos(glm::radians(12.5f));
+    outerCutOff = glm::cos(glm::radians(15.f));
+    constant = 1.f;
+    linear = 0.09f;
+    quadratic = 0.032f;
+    ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+    diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+    specular = glm::vec3(1.0f, 1.0f, 1.0f);
+}
+
+void Engine::Graphics::FlashLight::Apply(Shader& shader, const std::string& uniformName) const{
+    PointLight::Apply(shader, uniformName);
+    
+    shader.setVec3((uniformName + ".direction").c_str(), direction);
+    shader.setFloat((uniformName + ".cutOff").c_str(), cutOff);
+    shader.setFloat((uniformName + ".outerCutOff").c_str(), outerCutOff);
+}
+
+void Engine::Graphics::FlashLight::setDirection(const glm::vec3& dir){
+    direction = dir;
+}
+
+void Engine::Graphics::FlashLight::setCutOff(float cutO, float outerCutO){
+    cutOff = cutO;
+    outerCutOff = outerCutO;
+}
+
+glm::vec3 Engine::Graphics::FlashLight::getDirection() const{
+    return direction;
+}
+
+

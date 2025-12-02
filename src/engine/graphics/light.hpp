@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include "glm/fwd.hpp"
+#include "glm/trigonometric.hpp"
 #include "shader.hpp"
 
 namespace Engine{
@@ -54,7 +56,7 @@ class DirectionalLight : public Light{
 };
 
 class PointLight : public Light{
-    private:
+    protected:
         glm::vec3 position;
         float constant;
         float linear;
@@ -77,6 +79,35 @@ class PointLight : public Light{
         
         glm::vec3 GetPosition() const;
 };
+
+class FlashLight : public PointLight{
+    private:
+       glm::vec3 direction;
+       float cutOff;
+       float outerCutOff;
+    
+    public:
+        FlashLight(glm::vec3 direction = glm::vec3(2, -2, -5),
+                float cutOff = glm::cos(glm::radians(12.5f)),
+                float outerCutOff = glm::cos(glm::radians(15.f)),
+                glm::vec3 pos = glm::vec3(0.f),
+                float constant = 1.f,
+                float linear = 0.09f,
+                float quadratic = 0.032f,
+                glm::vec3 ambient = glm::vec3(1.f, 1.f, 1.f),
+                glm::vec3 diffuse = glm::vec3(1.f, 1.f, 1.f),
+                glm::vec3 specular = glm::vec3(1.f, 1.f, 1.f));
+        
+        FlashLight(glm::vec3 pos, glm::vec3 dir);
+        
+        void Apply(Shader& shader, const std::string& uniformName) const override;
+        
+        void setDirection(const glm::vec3& dir);
+        void setCutOff(float cutO, float outerCutO);
+        
+        glm::vec3 getDirection() const;
+}; 
+
 }}
 
 #endif
