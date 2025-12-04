@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,8 +9,6 @@
 #include "engine/graphics/lightmanager.hpp"
 #include "engine/graphics/mesh.hpp"
 #include <stb_image/stb_image.h>
-#include <string>
-#include <vector>
 #include "engine/graphics/shader.hpp"
 #include "engine/graphics/texture.hpp"
 #include "engine/graphics/camera.hpp"
