@@ -8,6 +8,7 @@
 #include "engine/graphics/light.hpp"
 #include "engine/graphics/lightmanager.hpp"
 #include "engine/graphics/mesh.hpp"
+#include <ostream>
 #include <stb_image/stb_image.h>
 #include "engine/graphics/shader.hpp"
 #include "engine/graphics/texture.hpp"
@@ -57,7 +58,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     if(key == GLFW_KEY_F && action == GLFW_PRESS){
         lightManager.setUseFlashLight(!lightManager.getUseFlashLight());
-        std::cout << lightManager.getUseFlashLight() << std::endl;
+        if(lightManager.getUseFlashLight()){
+            std::cout << "Flashlight ON" << std::endl;
+        } else {
+            std::cout << "Flashlight OFF" << std::endl;
+        }
     }
 }
 
@@ -213,9 +218,6 @@ int main()
         
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-
-            static int counter = 0;
-        
             // Set up the ImGui window to be a fixed panel on the right
             ImGui::SetNextWindowPos(ImVec2(WIDTH - 300, 0));  // Position at right edge
             ImGui::SetNextWindowSize(ImVec2(300, HEIGHT));     // 300px wide, full height
@@ -229,25 +231,18 @@ int main()
             ImGui::Checkbox("Use Directional Light", lightManager.setUseDirLight());
             
             for(size_t i = 0; i < lightManager.getPointLightCount(); i++){
-                std::string label = "Use Point Light " + std::to_string(i);
+                std::string label = "Use Point Light " + std::to_string(i + 1);
                 bool tempBool = lightManager.getUsePointLight(i);
                 if(ImGui::Checkbox(label.c_str(), &tempBool)){
                     lightManager.setUsePointLight(i, tempBool);
                 }
                 
             }
-            
-            
             ImGui::SliderFloat("Flash Light Cut Off", &cutOff, 0, 45);
             ImGui::SliderFloat("Flash Light Outer Cut Off", &outerCutOff, 0, 45);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // TODO: Make Point Light / Directional Light / Flashlight configurable
         
-            if (ImGui::Button("Button"))
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-        
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::Text("FPS: %.1f", io.Framerate);
             ImGui::End();
         }
         ImGui::Render();
@@ -365,6 +360,7 @@ int main()
     shaderProgram.Delete();
     // Delete window before ending the program
     glfwDestroyWindow(window);
+
     // Terminate GLFW before ending the program
     glfwTerminate();
     return 0;
